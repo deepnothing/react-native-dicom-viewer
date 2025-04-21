@@ -1,22 +1,36 @@
-import { NativeModules, Platform } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { requireNativeComponent, UIManager, findNodeHandle, Platform } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
-const LINKING_ERROR =
-  `The package 'react-native-dicom-viewer' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+const LINKING_ERROR = `The package 'react-native-dicom-viewer' doesn't seem to be linked.`;
 
-const DicomViewer = NativeModules.DicomViewer
-  ? NativeModules.DicomViewer
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
+type DicomViewerViewProps = {
+  style?: ViewStyle;
+  ref?: React.RefObject<any>;
+};
+
+const DicomViewerView = requireNativeComponent<DicomViewerViewProps>('DicomViewerView');
+
+type Props = {
+  style?: ViewStyle;
+  path: string;
+};
+
+export default function DicomViewer({ style, path }: Props) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (ref.current && Platform.OS === 'ios') {
+      const nodeHandle = findNodeHandle(ref.current);
+      if (nodeHandle !== null) {
+        UIManager.dispatchViewManagerCommand(
+          nodeHandle,
+          UIManager.getViewManagerConfig('DicomViewerView').Commands.setPath,
+          [path]
+        );
       }
-    );
+    }
+  }, [path]);
 
-export function multiply(a: number, b: number): Promise<number> {
-  return DicomViewer.multiply(a, b);
+  return <DicomViewerView style={style} ref={ref} />;
 }

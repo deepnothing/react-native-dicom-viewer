@@ -1,22 +1,13 @@
-package com.dicomviewer
-
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
-
+@ReactModule(name = DicomViewerModule.NAME)
 class DicomViewerModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
+    
+  override fun getName() = NAME
 
-  override fun getName(): String {
-    return NAME
-  }
-
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  fun viewDicom(filePath: String, promise: Promise) {
+    // TODO: Use dcm4che or render in an Activity
+    promise.resolve("Viewing DICOM at $filePath")
   }
 
   companion object {

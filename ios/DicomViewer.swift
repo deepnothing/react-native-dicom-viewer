@@ -1,8 +1,8 @@
 @objc(DicomViewer)
 class DicomViewer: NSObject {
-
-  @objc(multiply:withB:withResolver:withRejecter:)
-  func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-    resolve(a*b)
+  @objc(viewDicom:withResolver:withRejecter:)
+  func viewDicom(filePath: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    // TODO: Use native viewer or open image
+    resolve("Viewing DICOM at \(filePath)")
   }
-}
+} 
