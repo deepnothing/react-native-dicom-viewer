@@ -1,5 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import { requireNativeComponent, UIManager, findNodeHandle, Platform } from 'react-native';
+import {
+  requireNativeComponent,
+  UIManager,
+  findNodeHandle,
+  Platform,
+} from 'react-native';
 import type { ViewStyle } from 'react-native';
 
 const LINKING_ERROR = `The package 'react-native-dicom-viewer' doesn't seem to be linked.`;
@@ -9,7 +14,8 @@ type DicomViewerViewProps = {
   ref?: React.RefObject<any>;
 };
 
-const DicomViewerView = requireNativeComponent<DicomViewerViewProps>('DicomViewerView');
+const DicomViewerView =
+  requireNativeComponent<DicomViewerViewProps>('DicomViewerView');
 
 type Props = {
   style?: ViewStyle;

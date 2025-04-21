@@ -1,17 +1,10 @@
-import React from 'react';
-import { SafeAreaView, Text, StyleSheet, Button, Alert } from 'react-native';
+import { SafeAreaView, Text, StyleSheet } from 'react-native';
 import DicomViewer from 'react-native-dicom-viewer';
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>📄 DICOM Viewer Example</Text>
-      <Button
-        title="Load DICOM"
-        onPress={() => {
-          Alert.alert('Loading DICOM');
-        }}
-      />
       <DicomViewer style={styles.viewer} path="dummy.dcm" />
     </SafeAreaView>
   );
