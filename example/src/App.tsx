@@ -5,7 +5,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>📄 DICOM Viewer Example</Text>
-      <DicomViewer style={styles.viewer} path="dummy.dcm" />
+      <DicomViewer style={styles.viewer} src="test2.DCM" />
     </SafeAreaView>
   );
 }
