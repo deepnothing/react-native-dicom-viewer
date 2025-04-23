@@ -10,15 +10,25 @@ npm install react-native-dicom-viewer
 
 ## Usage
 
-
 ```js
-import { multiply } from 'react-native-dicom-viewer';
+import DicomViewer from 'react-native-dicom-viewer';
 
 // ...
 
-const result = await multiply(3, 7);
-```
+  const handleFrameChange = (event: {
+    nativeEvent: { index: number; total: number };
+  }) => {
+    const { index, total } = event.nativeEvent;
+    setCurrentFrame(index);
+    setTotalFrames(total);
+  };
 
+<DicomViewer
+  style={styles.viewer}
+  src="test2.DCM"
+  onFrameChange={handleFrameChange}
+/>
+```
 
 ## Contributing
 

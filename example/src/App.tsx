@@ -1,21 +1,11 @@
 import { SafeAreaView, Text, View, StyleSheet } from 'react-native';
 import DicomViewer from 'react-native-dicom-viewer';
-import SeriesNotification from './components/SeriesNotification';
 import ScrollIndicator from './components/ScrollIndicator';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function App() {
-  const [showBeginNotification, setShowBeginNotification] = useState(false);
-  const [showEndNotification, setShowEndNotification] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [totalFrames, setTotalFrames] = useState(0);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    if (totalFrames > 0 && !isInitialized) {
-      setIsInitialized(true);
-    }
-  }, [totalFrames]);
 
   const handleFrameChange = (event: {
     nativeEvent: { index: number; total: number };
@@ -23,21 +13,6 @@ export default function App() {
     const { index, total } = event.nativeEvent;
     setCurrentFrame(index);
     setTotalFrames(total);
-
-    // Only show notifications after first load
-    if (isInitialized) {
-      if (index === 0) {
-        setShowEndNotification(false);
-        setShowBeginNotification(true);
-      } else if (index === total - 1) {
-        setShowBeginNotification(false);
-        setShowEndNotification(true);
-      } else {
-        // Hide both notifications when scrolling
-        setShowBeginNotification(false);
-        setShowEndNotification(false);
-      }
-    }
   };
 
   return (
@@ -55,20 +30,6 @@ export default function App() {
         <ScrollIndicator
           currentFrame={currentFrame}
           totalFrames={totalFrames}
-        />
-        <SeriesNotification
-          message="Beginning of Series"
-          type="begin"
-          visible={showBeginNotification}
-          timeout={1000}
-          onHide={() => setShowBeginNotification(false)}
-        />
-        <SeriesNotification
-          message="End of Series"
-          type="end"
-          visible={showEndNotification}
-          timeout={1000}
-          onHide={() => setShowEndNotification(false)}
         />
       </View>
     </SafeAreaView>
