@@ -14,8 +14,7 @@ class DicomViewerView: UIView {
         }
     }
     
-    @objc var onSeriesEnd: RCTDirectEventBlock?
-    @objc var onSeriesBegin: RCTDirectEventBlock?
+    @objc var onFrameChange: RCTDirectEventBlock?
     
     private func loadAndParseDicomFile(named filename: String) {
         guard let path = Bundle.main.path(forResource: filename, ofType: nil) else {
@@ -74,8 +73,12 @@ class DicomViewerView: UIView {
                 
                 print("[DicomViewerView] Loaded \(images.count) images in series")
                 
-                // Show the first image
+                // Emit initial frame information
                 DispatchQueue.main.async {
+                    self.onFrameChange?([
+                        "index": 0,
+                        "total": self.images.count
+                    ])
                     self.showImageAtIndex(0)
                 }
             } else {
@@ -110,12 +113,10 @@ class DicomViewerView: UIView {
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.addSubview(imageView)
         
-        // Fire events when reaching beginning or end of series
-        if index == 0 {
-            onSeriesBegin?([:])
-        } else if index == images.count - 1 {
-            onSeriesEnd?([:])
-        }
+        onFrameChange?([
+            "index": index,
+            "total": images.count
+        ])
         
         currentIndex = index
     }

@@ -1,36 +1,60 @@
 import { SafeAreaView, Text, View, StyleSheet } from 'react-native';
 import DicomViewer from 'react-native-dicom-viewer';
 import SeriesNotification from './components/SeriesNotification';
-import { useState, useRef } from 'react';
+import ScrollIndicator from './components/ScrollIndicator';
+import { useState, useEffect } from 'react';
 
 export default function App() {
   const [showBeginNotification, setShowBeginNotification] = useState(false);
   const [showEndNotification, setShowEndNotification] = useState(false);
-  const isFirstLoad = useRef(true);
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [totalFrames, setTotalFrames] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const handleSeriesEnd = () => {
-    setShowBeginNotification(false);
-    setShowEndNotification(true);
-  };
-
-  const handleSeriesBegin = () => {
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false;
-      return;
+  useEffect(() => {
+    if (totalFrames > 0 && !isInitialized) {
+      setIsInitialized(true);
     }
-    setShowEndNotification(false);
-    setShowBeginNotification(true);
+  }, [totalFrames]);
+
+  const handleFrameChange = (event: {
+    nativeEvent: { index: number; total: number };
+  }) => {
+    const { index, total } = event.nativeEvent;
+    setCurrentFrame(index);
+    setTotalFrames(total);
+
+    // Only show notifications after first load
+    if (isInitialized) {
+      if (index === 0) {
+        setShowEndNotification(false);
+        setShowBeginNotification(true);
+      } else if (index === total - 1) {
+        setShowBeginNotification(false);
+        setShowEndNotification(true);
+      } else {
+        // Hide both notifications when scrolling
+        setShowBeginNotification(false);
+        setShowEndNotification(false);
+      }
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>React Native DICOM Viewer</Text>
+      <Text style={styles.frameInfo}>
+        Frame {currentFrame + 1} / {totalFrames}
+      </Text>
       <View style={styles.viewerContainer}>
         <DicomViewer
           style={styles.viewer}
           src="test2.DCM"
-          onSeriesBegin={handleSeriesBegin}
-          onSeriesEnd={handleSeriesEnd}
+          onFrameChange={handleFrameChange}
+        />
+        <ScrollIndicator
+          currentFrame={currentFrame}
+          totalFrames={totalFrames}
         />
         <SeriesNotification
           message="Beginning of Series"
@@ -72,5 +96,10 @@ const styles = StyleSheet.create({
   },
   viewerContainer: {
     position: 'relative',
+  },
+  frameInfo: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 10,
   },
 });

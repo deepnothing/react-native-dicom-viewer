@@ -6,9 +6,9 @@ import {
 
 type DicomViewerProps = ViewProps & {
   src?: string;
-  hasScrollIndicator?: boolean;
-  onSeriesEnd?: () => void;
-  onSeriesBegin?: () => void;
+  onFrameChange?: (event: {
+    nativeEvent: { index: number; total: number };
+  }) => void;
 };
 
 const DicomViewer =
