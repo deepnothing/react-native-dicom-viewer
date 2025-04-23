@@ -19,3 +19,10 @@ class DicomViewerViewManager: RCTViewManager {
         view.src = src
     }
 }
+
+// Add support for events
+extension DicomViewerViewManager {
+    @objc func addEvent(_ node: NSNumber, name: String, location: String) {
+        // Required by React Native, even if empty
+    }
+}

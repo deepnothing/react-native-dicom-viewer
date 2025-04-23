@@ -6,6 +6,7 @@ struct DicomTag {
     let vr: String
     let length: UInt32
     let value: Data
+    var frames: [Data]? 
     
     /// Interprets little‑endian US/SS/UL values as Swift `Int`.
     var asInt: Int? {
@@ -35,32 +36,24 @@ class DicomParser {
 
         // Skip 128-byte preamble + "DICM" (4 bytes)
         cursor = 132
-        print("[DicomParser] Starting parse at cursor: \(cursor)")
 
         while cursor + 8 <= data.count {
             guard let tag = readTag() else { 
-                print("[DicomParser] Failed to read tag at cursor: \(cursor)")
                 break 
             }
             tags.append(tag)
         }
-
-        print("[DicomParser] Finished parsing at cursor: \(cursor) of \(data.count) bytes")
         return tags
     }
 
     private func readTag() -> DicomTag? {
         guard cursor + 8 <= data.count else { 
-            print("[DicomParser] Not enough bytes remaining at cursor: \(cursor)")
             return nil 
         }
 
         let group = readUInt16()
         let element = readUInt16()
         let vr = readString(length: 2)
-        
-        print("[DicomParser] Reading tag (\(String(format: "%04X", group)),\(String(format: "%04X", element))) VR: \(vr)")
-
         var length: UInt32 = 0
         
         // Handle special cases
@@ -68,11 +61,8 @@ class DicomParser {
             cursor += 2 // Skip reserved bytes
             length = readUInt32()
             
-            if length == 0xFFFFFFFF {
-                print("[DicomParser] Found undefined length \(vr == "SQ" ? "sequence" : "pixel data")")
-                
+            if length == 0xFFFFFFFF {                
                 if vr == "SQ" {
-                    // Handle sequence as before
                     // Skip sequence items until sequence delimiter
                     var sequenceData = Data()
                     while cursor + 8 <= data.count {
@@ -100,36 +90,31 @@ class DicomParser {
                     return DicomTag(group: group, element: element, vr: vr, length: UInt32(sequenceData.count), value: sequenceData)
                 } else {
                     // Handle encapsulated pixel data
-                    var pixelData = Data()
+                    var frames: [Data] = []
                     
-                    // Read and skip Basic Offset Table
+                    // Skip Basic Offset Table
                     let itemGroup = readUInt16()
                     let itemElement = readUInt16()
                     if itemGroup == 0xFFFE && itemElement == 0xE000 {
                         let offsetTableLength = readUInt32()
-                        cursor += Int(offsetTableLength) // Skip offset table
-                        print("[DicomParser] Skipped offset table of length: \(offsetTableLength)")
+                        cursor += Int(offsetTableLength)
                     } else {
-                        // Move back if we didn't find offset table
                         cursor -= 4
                     }
                     
-                    // Look for actual pixel data
+                    // Read each frame
                     while cursor + 8 <= data.count {
                         let frameGroup = readUInt16()
                         let frameElement = readUInt16()
                         let frameLength = readUInt32()
                         
                         if frameGroup == 0xFFFE {
-                            if frameElement == 0xE000 { // Item
-                                print("[DicomParser] Found pixel item of length: \(frameLength)")
+                            if frameElement == 0xE000 { // Frame Item
                                 if cursor + Int(frameLength) <= data.count {
-                                    // Look for JPEG start marker
-                                    var frameData = data.subdata(in: cursor..<(cursor + Int(frameLength)))
+                                    let frameData = data.subdata(in: cursor..<(cursor + Int(frameLength)))
                                     if let jpegStart = frameData.firstRange(of: Data([0xFF, 0xD8])) {
-                                        frameData = frameData.subdata(in: jpegStart.startIndex..<frameData.endIndex)
-                                        pixelData.append(frameData)
-                                        print("[DicomParser] Found JPEG start marker at offset \(jpegStart.startIndex)")
+                                        let jpegData = frameData.subdata(in: jpegStart.startIndex..<frameData.endIndex)
+                                        frames.append(jpegData)
                                     }
                                     cursor += Int(frameLength)
                                 }
@@ -137,19 +122,12 @@ class DicomParser {
                                 break
                             }
                         } else {
-                            cursor -= 8 // Move back if not a valid frame
+                            cursor -= 8
                             break
                         }
                     }
                     
-                    if !pixelData.isEmpty {
-                        print("[DicomParser] Total pixel data length: \(pixelData.count)")
-                        // Print first few bytes to verify JPEG header
-                        let prefix = pixelData.prefix(16).map { String(format: "%02X", $0) }.joined(separator: " ")
-                        print("[DicomParser] Pixel data starts with: \(prefix)")
-                    }
-                    
-                    return DicomTag(group: group, element: element, vr: vr, length: UInt32(pixelData.count), value: pixelData)
+                    return DicomTag(group: group, element: element, vr: vr, length: length, value: Data(), frames: frames)
                 }
             }
         }
@@ -157,13 +135,11 @@ class DicomParser {
         else if ["OB", "OW", "UN", "UT"].contains(vr) {
             cursor += 2 // Reserved bytes
             length = readUInt32()
-            print("[DicomParser] Reading \(vr) value of length: \(length)")
         } else {
             length = UInt32(readUInt16())
         }
 
         guard cursor + Int(length) <= data.count else {
-            print("[DicomParser] Tag value would exceed data length at cursor: \(cursor) + \(length)")
             return nil 
         }
 

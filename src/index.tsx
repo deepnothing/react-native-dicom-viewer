@@ -4,16 +4,16 @@ import {
   type ViewProps,
 } from 'react-native';
 
-const COMPONENT_NAME = 'DicomViewerView';
-
 type DicomViewerProps = ViewProps & {
   src?: string;
   hasScrollIndicator?: boolean;
+  onSeriesEnd?: () => void;
+  onSeriesBegin?: () => void;
 };
 
 const DicomViewer =
-  UIManager.getViewManagerConfig(COMPONENT_NAME) != null
-    ? requireNativeComponent<DicomViewerProps>(COMPONENT_NAME)
+  UIManager.getViewManagerConfig('DicomViewerView') != null
+    ? requireNativeComponent<DicomViewerProps>('DicomViewerView')
     : () => null;
 
 export default DicomViewer;

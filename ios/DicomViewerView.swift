@@ -14,57 +14,45 @@ class DicomViewerView: UIView {
         }
     }
     
+    @objc var onSeriesEnd: RCTDirectEventBlock?
+    @objc var onSeriesBegin: RCTDirectEventBlock?
+    
     private func loadAndParseDicomFile(named filename: String) {
         guard let path = Bundle.main.path(forResource: filename, ofType: nil) else {
             print("[DicomViewerView] Could not find DICOM file named \(filename)")
             return
         }
 
-        print("[DicomViewerView] Loading DICOM series with \(images.count) images")
+        print("[DicomViewerView] Loading DICOM series...")
 
         do {
             let parser = try DicomParser(fileURL: URL(fileURLWithPath: path))
             let tags = parser.parse()
 
             // 1. Collect the information we need while iterating.
-            var columns      : Int?
-            var rows         : Int?
-            var pixelDataBlob: Data?
-            var bitsAllocated: Int?
-            var samplesPerPixel: Int?
+            var columns: Int?
+            var rows: Int?
+            var numberOfFrames: Int = 1
+            var pixelFrames: [Data]?
 
             for tag in tags {
-                print(String(format: "[DICOM] Tag: (%04X,%04X) VR: %@ Length: %d", tag.group, tag.element, tag.vr, tag.length))
-
                 switch (tag.group, tag.element) {
                 case (0x0028, 0x0010): // Rows
                     rows = tag.asInt
-                    print("[DICOM] Found Rows: \(rows ?? -1)")
 
                 case (0x0028, 0x0011): // Columns
                     columns = tag.asInt
-                    print("[DICOM] Found Columns: \(columns ?? -1)")
 
-                case (0x0028, 0x0100): // Bits Allocated
-                    bitsAllocated = tag.asInt
-                    print("[DICOM] Bits Allocated: \(bitsAllocated ?? -1)")
-
-                case (0x0028, 0x0002): // Samples per Pixel
-                    samplesPerPixel = tag.asInt
-                    print("[DICOM] Samples per Pixel: \(samplesPerPixel ?? -1)")
-
-                case (0x7FE0, 0x0010): // Pixel Data
-                    pixelDataBlob = tag.asData
-                    print("[DICOM] Found Pixel Data of length: \(tag.asData?.count ?? 0)")
-                    if let data = tag.asData {
-                        // Print first few bytes to help debug
-                        let prefix = data.prefix(16).map { String(format: "%02X", $0) }.joined(separator: " ")
-                        print("[DICOM] Pixel Data starts with: \(prefix)")
+                case (0x0028, 0x0008): // Number of Frames
+                    if let frames = tag.value.withUnsafeBytes({ String(bytes: $0, encoding: .ascii) }) {
+                        numberOfFrames = Int(frames.trimmingCharacters(in: .whitespaces)) ?? 1
+                        print("[DicomViewerView] Found \(numberOfFrames) frames in series")
                     }
 
-                case (0x0002, 0x0010): // Transfer Syntax
-                    if let syntax = String(data: tag.value, encoding: .ascii) {
-                        print("[DICOM] Transfer Syntax: \(syntax)")
+                case (0x7FE0, 0x0010): // Pixel Data
+                    pixelFrames = tag.frames
+                    if let frames = tag.frames {
+                        print("[DicomViewerView] Found \(frames.count) JPEG frames")
                     }
 
                 default:
@@ -72,45 +60,38 @@ class DicomViewerView: UIView {
                 }
             }
             
-            // 2. Create a CGImage once we have everything.
-            if let w = columns,
-               let h = rows,
-               let data = pixelDataBlob,
-               let cgImg = createGrayscaleImage(from: data, width: w, height: h) {
+            // 2. Process frames after we have all metadata
+            if let w = columns, let h = rows, let frames = pixelFrames {
+                // Clear existing images
+                images.removeAll()
                 
-                // Add the image to our array
-                images.append(cgImg)
+                // Process each frame
+                for (index, frameData) in frames.enumerated() {
+                    if let cgImg = createGrayscaleImage(from: frameData, width: w, height: h) {
+                        images.append(cgImg)
+                    }
+                }
                 
-                // Show the first image immediately, or update current image
+                print("[DicomViewerView] Loaded \(images.count) images in series")
+                
+                // Show the first image
                 DispatchQueue.main.async {
-                    self.showImageAtIndex(self.currentIndex)
+                    self.showImageAtIndex(0)
                 }
             } else {
-                print("[DicomViewerView] Missing rows / columns / pixel data.")
+                print("[DicomViewerView] Missing required DICOM attributes")
             }
         } catch {
             print("[DicomViewerView] Failed to parse DICOM file: \(error)")
         }
     }
 
-    // create images from parsed dicom data
-    func createGrayscaleImage(from pixelData: Data, width: Int, height: Int) -> CGImage? {
-        // For JPEG compressed data, use ImageIO to decode
-        if let dataProvider = CGDataProvider(data: pixelData as CFData) {
-            print("[DicomViewerView] Creating image source from data of length: \(pixelData.count)")
-            if let imageSource = CGImageSourceCreateWithDataProvider(dataProvider, nil) {
-                print("[DicomViewerView] Created image source")
-                if let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
-                    print("[DicomViewerView] Successfully created CGImage")
-                    return image
-                } else {
-                    print("[DicomViewerView] Failed to create CGImage from source")
-                }
-            } else {
-                print("[DicomViewerView] Failed to create image source")
-            }
-        } else {
-            print("[DicomViewerView] Failed to create data provider")
+    // Simplify image creation since we're now passing individual frame data
+    func createGrayscaleImage(from frameData: Data, width: Int, height: Int) -> CGImage? {
+        if let dataProvider = CGDataProvider(data: frameData as CFData),
+           let imageSource = CGImageSourceCreateWithDataProvider(dataProvider, nil),
+           let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
+            return image
         }
         return nil
     }
@@ -129,10 +110,17 @@ class DicomViewerView: UIView {
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.addSubview(imageView)
         
+        // Fire events when reaching beginning or end of series
+        if index == 0 {
+            onSeriesBegin?([:])
+        } else if index == images.count - 1 {
+            onSeriesEnd?([:])
+        }
+        
         currentIndex = index
     }
 
-    // MARK: - Scroll testing
+    // Gesture handling to scroll through frames
 
     private var lastTouchY: CGFloat = 0
 
@@ -154,26 +142,32 @@ class DicomViewerView: UIView {
     }
 
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: self)
-        
-        if gesture.state == .ended {
-            let velocity = gesture.velocity(in: self)
+        switch gesture.state {
+        case .began:
+            // Store initial position
+            lastTouchY = gesture.location(in: self).y
             
-            // Determine if it was a significant swipe
-            if abs(velocity.y) > 500 {  // Adjust threshold as needed
-                if velocity.y > 0 {
-                    // Swipe down - previous image
-                    print("[DicomViewerView] Swiped down - showing previous image (currentIndex: \(currentIndex))")
-                    showImageAtIndex(currentIndex - 1)
-                } else {
-                    // Swipe up - next image
-                    print("[DicomViewerView] Swiped up - showing next image (currentIndex: \(currentIndex))")
-                    showImageAtIndex(currentIndex + 1)
-                }
+        case .changed:
+            let currentY = gesture.location(in: self).y
+            let deltaY = currentY - lastTouchY
+            
+            // Calculate absolute position relative to view height
+            let absolutePosition = max(0, min(currentY / self.bounds.height, 1.0))
+            
+            // Map absolute position directly to frame index
+            let targetIndex = Int(absolutePosition * Double(images.count - 1))
+            
+            // Show frame if index changed
+            if targetIndex != currentIndex {
+                showImageAtIndex(targetIndex)
             }
             
-            // Reset gesture state
-            gesture.setTranslation(.zero, in: self)
+        case .ended:
+            // Optional: Add momentum scrolling here if desired
+            break
+            
+        default:
+            break
         }
     }
 }
