@@ -32,6 +32,10 @@ import DicomViewer from 'react-native-dicom-viewer';
 
 
 
+https://github.com/user-attachments/assets/621c81da-8737-4f3d-82f4-05eeba061ef7
+
+
+
 ## Author
 Teo Udovcic, teoudovcic@gmail.com
 
