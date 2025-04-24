@@ -11,6 +11,7 @@ type DicomViewerProps = ViewProps & {
   }) => void;
 };
 
+
 const DicomViewer =
   UIManager.getViewManagerConfig('DicomViewerView') != null
     ? requireNativeComponent<DicomViewerProps>('DicomViewerView')

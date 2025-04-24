@@ -2,27 +2,24 @@ package com.dicomviewer
 
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.uimanager.ViewManager
-import com.facebook.react.uimanager.SimpleViewManager
-import com.facebook.react.uimanager.annotations.ReactProp
-import com.facebook.react.common.MapBuilder
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Promise
 
-class DicomViewerManager(reactContext: ReactApplicationContext) : SimpleViewManager<DicomViewerView>() {
-    override fun getName() = "DicomViewer"
-    
-    override fun createViewInstance(reactContext: ReactApplicationContext): DicomViewerView {
-        return DicomViewerView(reactContext)
-    }
-    
-    @ReactProp(name = "filePath")
-    fun setFilePath(view: DicomViewerView, path: String) {
-        view.setFilePath(path)
-    }
-    
-    override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
-        return MapBuilder.builder<String, Any>()
-            .put("onLoadComplete", 
-                MapBuilder.of("registrationName", "onLoadComplete"))
-            .build()
-    }
+class DicomViewerModule(reactContext: ReactApplicationContext) :
+  ReactContextBaseJavaModule(reactContext) {
+
+  override fun getName(): String {
+    return NAME
+  }
+
+  // Example method
+  // See https://reactnative.dev/docs/native-modules-android
+  @ReactMethod
+  fun multiply(a: Double, b: Double, promise: Promise) {
+    promise.resolve(a * b)
+  }
+
+  companion object {
+    const val NAME = "DicomViewer"
+  }
 }

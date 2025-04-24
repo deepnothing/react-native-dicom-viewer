@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
     width: '90%',
     aspectRatio: 1,
     backgroundColor: '#222',
-    borderRadius: 10,
   },
   viewerContainer: {
     position: 'relative',
