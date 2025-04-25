@@ -1,7 +1,7 @@
 {
   "name": "react-native-dicom-viewer",
-  "version": "0.1.0",
-  "description": "react native dicom viewer",
+  "version": "0.1.1",
+  "description": "A React Native viewer for DICOM medical images",
   "source": "./src/index.tsx",
   "main": "./lib/module/index.js",
   "exports": {
@@ -40,9 +40,11 @@
     "release": "release-it"
   },
   "keywords": [
+    "dicom",
+    "viewer",
     "react-native",
-    "ios",
-    "android"
+    "medical",
+    "images"
   ],
   "repository": {
     "type": "git",
