@@ -51,6 +51,8 @@ class DicomViewerView(context: Context) : FrameLayout(context) {
                     val absolutePosition = (e2.y / height).coerceIn(0f, 1f)
                     val targetIndex = (absolutePosition * (images.size - 1)).toInt()
                     
+                    Log.d("DicomViewerView", "Calculated position: $absolutePosition, target index: $targetIndex, current index: $currentIndex")
+                    
                     if (targetIndex != currentIndex) {
                         showImageAtIndex(targetIndex)
                     }
@@ -75,32 +77,44 @@ class DicomViewerView(context: Context) : FrameLayout(context) {
         try {
             Log.d("DicomViewerView", "Starting to load DICOM file: $path")
             
-            // Try to load from assets first
-            val assetManager = context.assets
-            val inputStream = try {
-                assetManager.open(path)
-            } catch (e: Exception) {
-                Log.d("DicomViewerView", "File not found in assets, trying absolute path")
-                null
-            }
-
-            val file = if (inputStream != null) {
-                // Create a temporary file from the asset
-                val tempFile = File.createTempFile("dicom", null, context.cacheDir)
-                FileOutputStream(tempFile).use { output ->
-                    inputStream.use { input ->
-                        input.copyTo(output)
+            val file = when {
+                // Handle content URIs
+                path.startsWith("content://") -> {
+                    Log.d("DicomViewerView", "Loading from content URI")
+                    val inputStream = context.contentResolver.openInputStream(android.net.Uri.parse(path))
+                    // Create a temporary file from the content URI
+                    val tempFile = File.createTempFile("dicom", null, context.cacheDir)
+                    FileOutputStream(tempFile).use { output ->
+                        inputStream?.use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                    tempFile
+                }
+                // Check if it's an absolute path that exists
+                File(path).exists() -> {
+                    Log.d("DicomViewerView", "Loading from absolute path")
+                    File(path)
+                }
+                // Try to load from assets
+                else -> {
+                    Log.d("DicomViewerView", "Trying to load from assets")
+                    val assetManager = context.assets
+                    try {
+                        val inputStream = assetManager.open(path)
+                        // Create a temporary file from the asset
+                        val tempFile = File.createTempFile("dicom", null, context.cacheDir)
+                        FileOutputStream(tempFile).use { output ->
+                            inputStream.use { input ->
+                                input.copyTo(output)
+                            }
+                        }
+                        tempFile
+                    } catch (e: Exception) {
+                        Log.e("DicomViewerView", "Failed to load file from either path or assets: ${e.message}")
+                        return
                     }
                 }
-                tempFile
-            } else {
-                // Try as absolute path
-                File(path)
-            }
-
-            if (!file.exists()) {
-                Log.e("DicomViewerView", "File does not exist: $path")
-                return
             }
 
             val parser = DicomParser(file)
