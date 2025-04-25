@@ -1,6 +1,6 @@
 # react-native-dicom-viewer
 
-react-native-dicom-viewer is a React Native component for displaying DICOM images. It features a built-in DICOM file parser that does not rely on any third-party packages.
+react-native-dicom-viewer is a React Native component for displaying DICOM images. It features a built-in DICOM file parser that does not rely on any third-party packages. The library can read files in the app bundle or local upload by the user and has mostly been tested with Lossy JPEG compressed DICOM files.
 
 ## Installation
 
@@ -30,7 +30,7 @@ import DicomViewer from 'react-native-dicom-viewer';
 
 ## Demo
 
-https://github.com/user-attachments/assets/621c81da-8737-4f3d-82f4-05eeba061ef7
+https://github.com/user-attachments/assets/ceb63f8d-7d71-401b-95e2-d4a081ed1d82
 
 
 ## Author
