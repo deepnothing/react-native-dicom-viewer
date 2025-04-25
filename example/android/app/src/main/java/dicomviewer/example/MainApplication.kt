@@ -22,10 +22,8 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
-
-              // after setting newArchEnabled=false in gradle properties we no longer need to manually link these 2 
-              // add(DicomViewerPackage())
-              // add(RNDocumentPickerPackage())
+              add(DicomViewerPackage())
+              add(RNDocumentPickerPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"
