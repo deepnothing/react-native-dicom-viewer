@@ -17,15 +17,25 @@ class DicomViewerView: UIView {
     @objc var onFrameChange: RCTDirectEventBlock?
     
     private func loadAndParseDicomFile(named filename: String) {
-        guard let path = Bundle.main.path(forResource: filename, ofType: nil) else {
-            print("[DicomViewerView] Could not find DICOM file named \(filename)")
+        let fileURL: URL
+        
+        if let bundlePath = Bundle.main.path(forResource: filename, ofType: nil) {
+            // File exists in bundle
+            print("[DicomViewerView] Loading DICOM file from bundle")
+            fileURL = URL(fileURLWithPath: bundlePath)
+        } else if FileManager.default.fileExists(atPath: filename) {
+            // File exists at absolute path
+            print("[DicomViewerView] Loading DICOM file from absolute path")
+            fileURL = URL(fileURLWithPath: filename)
+        } else {
+            print("[DicomViewerView] Could not find DICOM file at path or in bundle: \(filename)")
             return
         }
 
         print("[DicomViewerView] Loading DICOM series...")
 
         do {
-            let parser = try DicomParser(fileURL: URL(fileURLWithPath: path))
+            let parser = try DicomParser(fileURL: fileURL)
             let tags = parser.parse()
 
             // 1. Collect the information we need while iterating.

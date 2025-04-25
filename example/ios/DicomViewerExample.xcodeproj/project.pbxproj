@@ -11,6 +11,7 @@
 		1D1A7CA2AB663996532FD11A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		AB183E962DBB2A7B0028E56C /* test1.DCM in Resources */ = {isa = PBXBuildFile; fileRef = AB183E952DBB2A7B0028E56C /* test1.DCM */; };
 		ABED2F522DB7169A00B34947 /* test.dcm in Resources */ = {isa = PBXBuildFile; fileRef = ABED2F512DB7169A00B34947 /* test.dcm */; };
 		ABED2F542DB8337A00B34947 /* test2.DCM in Resources */ = {isa = PBXBuildFile; fileRef = ABED2F532DB8337A00B34947 /* test2.DCM */; };
 		F7A61DECEE6D86325DC6DBB7 /* Pods_DicomViewerExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84CC46FF4878A84084F85A56 /* Pods_DicomViewerExample.framework */; };
@@ -24,6 +25,7 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DicomViewerExample/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DicomViewerExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84CC46FF4878A84084F85A56 /* Pods_DicomViewerExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DicomViewerExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB183E952DBB2A7B0028E56C /* test1.DCM */ = {isa = PBXFileReference; lastKnownFileType = file; path = test1.DCM; sourceTree = "<group>"; };
 		ABED2F512DB7169A00B34947 /* test.dcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = test.dcm; sourceTree = "<group>"; };
 		ABED2F532DB8337A00B34947 /* test2.DCM */ = {isa = PBXFileReference; lastKnownFileType = file; path = test2.DCM; sourceTree = "<group>"; };
 		AF27C4684155503032C5E391 /* Pods-DicomViewerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DicomViewerExample.release.xcconfig"; path = "Target Support Files/Pods-DicomViewerExample/Pods-DicomViewerExample.release.xcconfig"; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				ABED2F512DB7169A00B34947 /* test.dcm */,
 				ABED2F532DB8337A00B34947 /* test2.DCM */,
+				AB183E952DBB2A7B0028E56C /* test1.DCM */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -166,6 +169,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				AB183E962DBB2A7B0028E56C /* test1.DCM in Resources */,
 				ABED2F542DB8337A00B34947 /* test2.DCM in Resources */,
 				ABED2F522DB7169A00B34947 /* test.dcm in Resources */,
 				1D1A7CA2AB663996532FD11A /* PrivacyInfo.xcprivacy in Resources */,
@@ -395,10 +399,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -478,10 +479,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

@@ -2674,6 +2674,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-documents/picker@npm:^10.1.2":
+  version: 10.1.2
+  resolution: "@react-native-documents/picker@npm:10.1.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: b25e7c6e96ec98bd407f2d520f79d9f0ef7018f9ab7080f39b69f38a3b1b50d976d83b31e1b6a318c2a2fd6c14d32d84d1df22254940174e4f8b61f2c67b4cc2
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.79.1":
   version: 0.79.1
   resolution: "@react-native/assets-registry@npm:0.79.1"
@@ -10461,6 +10471,7 @@ __metadata:
     "@react-native-community/cli": 18.0.0
     "@react-native-community/cli-platform-android": 18.0.0
     "@react-native-community/cli-platform-ios": 18.0.0
+    "@react-native-documents/picker": ^10.1.2
     "@react-native/babel-preset": 0.79.1
     "@react-native/metro-config": 0.79.1
     "@react-native/typescript-config": 0.79.1
@@ -10494,6 +10505,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.79.1
     react-native-builder-bob: ^0.40.6
+    react-native-document-picker: ^9.3.1
     release-it: ^17.10.0
     turbo: ^1.10.7
     typescript: ^5.2.2
@@ -10502,6 +10514,22 @@ __metadata:
     react-native: "*"
   languageName: unknown
   linkType: soft
+
+"react-native-document-picker@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "react-native-document-picker@npm:9.3.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 5979e4b93f15e0568ae70b70cc2304cd727f20939a58412d483517942df6d3cf3821319b3b7934bcaa2866ed1918ef9e8de9933ce6953209340abe3455403e0d
+  languageName: node
+  linkType: hard
 
 "react-native@npm:0.79.1":
   version: 0.79.1

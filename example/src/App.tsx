@@ -1,7 +1,15 @@
-import { SafeAreaView, Text, View, StyleSheet, Button } from 'react-native';
-import DicomViewer from 'react-native-dicom-viewer';
-import ScrollIndicator from './components/ScrollIndicator';
 import { useState } from 'react';
+import {
+  SafeAreaView,
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  Platform,
+} from 'react-native';
+import DicomViewer from 'react-native-dicom-viewer';
+import { pick } from '@react-native-documents/picker';
+import ScrollIndicator from './components/ScrollIndicator';
 
 const demoFiles = ['test1.DCM', 'test2.DCM'];
 
@@ -16,6 +24,28 @@ export default function App() {
     const { index, total } = event.nativeEvent;
     setCurrentFrame(index);
     setTotalFrames(total);
+  };
+
+  const pickFile = async () => {
+    try {
+      const [result] = await pick({
+        type: Platform.select({
+          ios: ['public.data', 'public.content', 'public.item'],
+          android: ['*/*'],
+        }),
+      });
+
+      const filePath = Platform.select({
+        ios: result.uri.replace('file://', ''),
+        android: result.uri,
+      });
+
+      if (filePath) {
+        setSelectedFile(filePath);
+      }
+    } catch (err: unknown) {
+      console.error('Error picking document:', err);
+    }
   };
 
   return (
@@ -37,13 +67,17 @@ export default function App() {
       </View>
 
       <View style={styles.buttonsContainer}>
-        {demoFiles.map((file, index) => (
-          <Button
-            key={index}
-            title={file}
-            onPress={() => setSelectedFile(file)}
-          />
-        ))}
+        <View style={styles.buttonSection}>
+          {demoFiles.map((file, index) => (
+            <Button
+              key={index}
+              title={file}
+              onPress={() => setSelectedFile(file)}
+            />
+          ))}
+        </View>
+
+        <Button title="Upload DICOM File" onPress={pickFile} />
       </View>
     </SafeAreaView>
   );
@@ -52,7 +86,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111',
+    backgroundColor: '#2a2a2a',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -76,9 +110,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     width: '90%',
     marginTop: 20,
+  },
+  buttonSection: {
+    marginBottom: 15,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
   },
 });
